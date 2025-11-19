@@ -51,6 +51,7 @@ WebSystemAcademic/
 │   │   ├── alunosController.js
 │   │   ├── cursosController.js
 │   │   ├── departamentosController.js
+│   │   ├── emailsController.js
 │   │   ├── matriculasController.js
 │   │   ├── pagamentosController.js
 │   │   └── turmasController.js
@@ -63,6 +64,7 @@ WebSystemAcademic/
 │   │   ├── alunoModel.js
 │   │   ├── cursoModel.js
 │   │   ├── departamentoModel.js
+│   │   ├── emailModel.js
 │   │   ├── matriculaModel.js
 │   │   ├── pagamentoModel.js
 │   │   └── turmaModel.js
@@ -71,6 +73,7 @@ WebSystemAcademic/
 │   │   ├── alunos.js
 │   │   ├── cursos.js
 │   │   ├── departamentos.js
+│   │   ├── emails.js
 │   │   ├── matriculas.js
 │   │   ├── pagamentos.js
 │   │   └── turmas.js
@@ -125,4 +128,4 @@ The database is managed locally on Linux using **Azure Data Studio**.
 ---
 
 ## ℹ️ Note
-This project was developed for **UNICEP São Carlos University** under the guidance of Professor **Saulo Santos**.
+This project was developed for **UNICEP São Carlos University** under the guidance of teacher **Saulo Santos**.

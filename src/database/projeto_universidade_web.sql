@@ -83,6 +83,16 @@ CREATE TABLE pagamento (
     FOREIGN KEY (id_matricula) REFERENCES matricula(id_matricula)
 );
 
+-- TABELA EMAIL (relacionada ao aluno)
+CREATE TABLE email (
+    id_aluno INT NOT NULL,                            -- FK obrigatória
+    endereco_email VARCHAR(200) NOT NULL,            -- email obrigatório
+    mensagem TEXT,                                   -- mensagem opcional
+    data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,   -- data de envio automática
+    CONSTRAINT fk_email_aluno FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)
+);
+
+
 -- =====================================================
 -- CRIAÇÃO DE ÍNDICES PARA MELHOR PERFORMANCE
 -- =====================================================

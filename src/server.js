@@ -21,6 +21,7 @@ app.use("/api/turmas", require("./routes/turmas"));
 app.use("/api/alunos", require("./routes/alunos"));
 app.use("/api/matriculas", require("./routes/matriculas"));
 app.use("/api/pagamentos", require("./routes/pagamentos"));
+app.use("/api/emails", require("./routes/emails"));
 
 // Rotas movidas para módulos em ./routes
 

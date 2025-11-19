@@ -67,13 +67,91 @@ function showForm(entityType, data = null) {
 
   modal.style.display = "block";
 
-  // Adiciona event listener ao formulário
-  const form = document.getElementById("entity-form");
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    handleFormSubmit(entityType, data ? data.id : null);
-  });
+  // Só adiciona event listener se não for alerta
+  if (entityType !== "alerta") {
+    const form = document.getElementById("entity-form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        handleFormSubmit(entityType, data ? data.id : null);
+      });
+    }
+  }
 }
+
+function abrirPopupEmailAlerta(dadosStr) {
+  const dados = JSON.parse(decodeURIComponent(dadosStr));
+
+  console.log("Dados do aluno:", dados);
+
+  const modal = document.createElement('div');
+  modal.style = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5); display: flex; align-items: center;
+    justify-content: center; z-index: 9999;
+  `;
+
+  const corpoEmail = `Olá ${dados.alunoNome}, seu pagamento está ${dados.status}.\nPor favor, procure a secretaria para regularizar a sua situação.`;
+  const id_aluno = dados.id_aluno;
+
+
+  modal.innerHTML = `
+    <div style="background:#fff;padding:32px;border-radius:8px;max-width:500px;width:100%;position:relative;">
+      <button onclick="this.closest('div[style]').remove()" style="position:absolute;top:8px;right:8px;">&times;</button>
+      <h3>Enviar Alerta para <span>${dados.alunoNome}</span></h3>
+      <form id="form-envio-alerta">
+        <div class="form-group">
+          <label>Para (e-mail):</label>
+        <input type="email" id="email-alerta" value="" required style="width:100%" placeholder="Digite o e-mail do destinatário" />
+
+        </div>
+        <div class="form-group">
+          <label>Mensagem:</label>
+          <textarea id="mensagem-alerta" rows="10" style="width:100%">${corpoEmail}</textarea>
+        </div>
+        <div class="form-actions" style="margin-top:16px;">
+          <button type="submit" class="btn-primary">Enviar Email</button>
+          <button type="button" class="btn-secondary" onclick="this.closest('div[style]').remove()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.querySelector('#form-envio-alerta').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = modal.querySelector('#email-alerta').value;
+    
+    
+    const mensagem = modal.querySelector('#mensagem-alerta').value;
+
+    try {
+      const corpo = {
+        id_aluno: id_aluno,        // INT correto
+        endereco_email: email,
+        mensagem: mensagem
+      };
+
+      console.log("📤 Email enviado:", corpo);
+
+      const resposta = await fetch(`${API_BASE_URL}/emails`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo)
+      });
+
+      if (!resposta.ok) throw new Error("Falha ao enviar o email");
+
+      alert("Email enviado com sucesso!");
+      modal.remove();
+    } catch (erro) {
+      console.error(erro);
+      alert("Erro ao enviar email");
+    }
+  });
+
+  document.body.appendChild(modal);
+}
+
 
 function generateFormHTML(entityType, data) {
   const isEdit = data !== null;
@@ -458,7 +536,6 @@ function generateFormHTML(entityType, data) {
             `;
       break;
 
-      // Dentro de generateFormHTML()
 case "alerta":
   formHTML += `
     <h2>Enviar Alerta de Pagamento</h2>
@@ -485,6 +562,66 @@ case "alerta":
     }
   }, 100);
   return formHTML;
+  break;
+
+case "alerta-enviados":
+  setTimeout(carregarAlertasEnviados, 100); // chama a função depois de renderizar o HTML
+  return `
+    <h2>Alertas Enviados</h2>
+    <div id="alertas-enviados-container">
+      <table style="width:100%">
+        <thead>
+          <tr>
+            <th>ID aluno</th>
+            <th>Email</th>
+            <th>Mensagem</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-alertas-enviados">
+          <tr><td colspan="5">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn-secondary"
+        onclick="document.getElementById('modal').style.display='none'">Fechar</button>
+    </div>
+  `;
+  break;
+}
+
+async function carregarAlertasEnviados() {
+  const tbody = document.getElementById("tbody-alertas-enviados");
+  if (!tbody) return; // caso a aba ainda não tenha sido renderizada
+
+  try {
+    const resposta = await fetch("http://localhost:3000/api/emails");
+    if (!resposta.ok) throw new Error("Erro ao buscar dados");
+    const emails = await resposta.json();
+
+    if (!emails.length) {
+      tbody.innerHTML = `<tr><td colspan="5">Nenhum alerta enviado.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = emails
+      .map(
+        (e) => `
+        <tr>
+          <td>${e.id_aluno}</td>
+          <td>${e.endereco_email}</td>
+          <td>${e.mensagem || ""}</td>
+          <td>${new Date(e.data_envio).toLocaleString()}</td>
+        </tr>
+      `
+      )
+      .join("");
+  } catch (err) {
+    console.error("Erro ao carregar alertas:", err);
+    tbody.innerHTML = `<tr><td colspan="5">Erro ao carregar alertas.</td></tr>`;
+  }
+}
 
 
   function filtrarAlertasPorStatus() {
@@ -514,72 +651,33 @@ case "alerta":
       const turma = currentData.turmas.find(t => t.id_turma === matricula?.id_turma);
       const curso = currentData.cursos.find(c => c.id_curso === turma?.id_curso);
 
+      const dadosParaBotao = {
+        id_aluno: aluno?.id_aluno,       // INT para enviar ao backend
+        alunoNome: aluno?.nome,          // para exibir na mensagem
+        endereco_email: aluno?.email || '',       // se tiver email cadastrado
+        status: pagamento.status,
+        ultimoPagamento: pagamento.data_pagamento,
+        totalRestante: pagamento.valor,
+        curso: curso?.descricao,
+        periodo: pagamento.periodo_referencia
+      };
+
       html += `<li style="margin-bottom:12px;display:flex;align-items:center;gap:12px;">
         <span><b>${aluno?.nome || 'N/A'}</b> - ${curso?.descricao || 'N/A'}</span>
-        <button class="btn-primary" onclick="abrirPopupEmailAlerta('${encodeURIComponent(JSON.stringify({
-          aluno: aluno?.nome,
-          email: aluno?.email,
-          status: pagamento.status,
-          ultimoPagamento: pagamento.data_pagamento,
-          totalRestante: pagamento.valor,
-          curso: curso?.descricao,
-          periodo: pagamento.periodo_referencia
-        }))}')">Enviar Alerta</button>
+        <button class="btn-primary" type="button" onclick="abrirPopupEmailAlerta('${encodeURIComponent(JSON.stringify(dadosParaBotao))}')">Enviar Alerta</button>
       </li>`;
     });
     html += '</ul>';
     listaDiv.innerHTML = html;
   }
 
-  function abrirPopupEmailAlerta(dadosStr) {
-    const dados = JSON.parse(decodeURIComponent(dadosStr));
-    const modal = document.createElement('div');
-    modal.style = `
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 9999;
-    `;
 
-    const corpoEmail = `Olá ${dados.aluno},\n\n...`; // (mantém igual ao seu)
-
-    modal.innerHTML = `
-      <div style="background:#fff;padding:32px;border-radius:8px;max-width:500px;width:100%;position:relative;">
-        <button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:8px;right:8px;">&times;</button>
-        <h3>Enviar Alerta para <span>${dados.aluno}</span></h3>
-        <form id="form-envio-alerta">
-          <div class="form-group">
-            <label>Para (e-mail):</label>
-            <input type="email" id="email-alerta" value="${dados.email || ''}" required style="width:100%" />
-          </div>
-          <div class="form-group">
-            <label>Mensagem:</label>
-            <textarea id="mensagem-alerta" rows="10" style="width:100%">${corpoEmail}</textarea>
-          </div>
-          <div class="form-actions" style="margin-top:16px;">
-            <button type="submit" class="btn-primary">Enviar Email</button>
-            <button type="button" class="btn-secondary" onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    modal.querySelector('#form-envio-alerta').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const email = modal.querySelector('#email-alerta').value;
-      const mensagem = modal.querySelector('#mensagem-alerta').value;
-      alert(`Email enviado para ${dados.aluno} (${email})!\n\nMensagem:\n${mensagem}`);
-      modal.remove();
-    });
-
-    document.body.appendChild(modal);
-  }
-
+  
   // Função global para simular envio de email
   function enviarEmailAlerta(event, email, aluno, status, ultimoPagamento, totalRestante, curso, periodo) {
     event.preventDefault();
     alert(`Email enviado para ${aluno} (${email})!`);
     document.querySelectorAll('div[style*="z-index: 9999"]').forEach(e => e.remove());
-  }
   }
 
   formHTML += `
@@ -809,6 +907,20 @@ function generateTableRow(entityType, item) {
                 </td>
             `;
 
+    case "email":
+      return `
+        <td>${item.id_email}</td>
+        <td>${item.endereco_email}</td>
+        <td>${item.mensagem || "N/A"}</td>
+        <td><span class="status-badge status-${item.status || "pendente"}">${item.status || "pendente"}</span></td>
+        <td>
+          <button class="btn-secondary" onclick="editItem('${entityType}', ${JSON.stringify(
+            item
+          ).replace(/"/g, "&quot;")})">Editar</button>
+          <button class="btn-danger" onclick="deleteItem('${entityType}', ${item.id_email})">Excluir</button>
+        </td>
+      `;
+
     default:
       return "";
   }
@@ -822,6 +934,13 @@ async function handleFormSubmit(entityType, id = null) {
   const form = document.getElementById("entity-form");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData.entries());
+
+  // Gera email aleatório para aluno se não existir
+  if (entityType === "aluno" && !data.email) {
+    const nome = data.nome || "user";
+    const nomeFormatado = nome.toLowerCase().replace(/\s+/g, ".").replace(/[^a-z.]/g, "");
+    data.email = `${nomeFormatado}${Math.floor(Math.random()*1000)}@universidade.com`;
+  }
 
   showLoading(true);
 
@@ -861,6 +980,8 @@ async function handleFormSubmit(entityType, id = null) {
     showLoading(false);
   }
 }
+
+
 
 async function deleteItem(entityType, id) {
   if (
