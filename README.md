@@ -1,131 +1,82 @@
-# 🌐 WebSystemAcademic
+<h1 align="center" style="font-weight: bold;">Web System Academic</h1>
+<p align="center">
+<b>WebSystemAcademic</b> is a full-stack web application for academic data management, built with Node.js, Express.js, Faker.js and Microsoft SQL Server, featuring a responsive frontend with HTML, CSS and JavaScript.
+</p>
 
-**WebSystemAcademic** is a full-stack web application for academic data management.  
-Built with **Node.js**, **Express.js**, **Faker.js**, and **Microsoft SQL Server**, it features a responsive frontend developed with **HTML**, **CSS**, and **JavaScript**.  
-The database is managed on Linux using **Azure Data Studio**.
+## 📍 Features
 
----
+- **Academic Data Management**: Manage students, courses, grades, departments and more.
+- **RESTful API**: Built with Express.js for clean and scalable routing.
+- **Mock Data Generation**: Populate tables automatically using Faker.js scripts.
+- **SQL Server Integration**: Full integration with Microsoft SQL Server.
+- **Responsive Frontend**: Interface built with HTML, CSS and JavaScript.
 
-## 🚀 Features
-- Academic data management (students, courses, grades, etc.)
-- RESTful API using **Express.js**
-- Mock data generation for tables with **Faker.js**
-- Integration with **Microsoft SQL Server**
-- Responsive frontend built in **HTML**, **CSS**, and **JavaScript**
+## 💻 Technologies
 
----
-
-## 🧱 Technologies
 **Backend:**
-- Node.js  
-- Express.js  
-- Faker.js  
-- Microsoft SQL Server  
-- Azure Data Studio (for database management on Linux)  
+- Node.js
+- Express.js
+- Faker.js
+- Microsoft SQL Server
+- Azure Data Studio
 
 **Frontend:**
-- HTML  
-- CSS  
-- JavaScript  
-
----
+- HTML
+- CSS
+- JavaScript
 
 ## 📂 Project Structure
 ```
 WebSystemAcademic/
-│
-├── node_modules/
-│ 
 ├── public/
-│   ├── css/
-│   │    └── style.css
-│   ├── js/
-│   │    └── script.js
+│   ├── css/style.css
+│   ├── js/script.js
 │   └── index.html
-│
 ├── src/
-│   ├── config/
-│   │   └── db.js
-│   │
+│   ├── config/db.js
 │   ├── controllers/
-│   │   ├── alunosController.js
-│   │   ├── cursosController.js
-│   │   ├── departamentosController.js
-│   │   ├── emailsController.js
-│   │   ├── matriculasController.js
-│   │   ├── pagamentosController.js
-│   │   └── turmasController.js
-│   │
 │   ├── database/
-│   │   ├── cria_usuario_bd.sql
-│   │   └── projeto_universidade_web.sql
-│   │
 │   ├── models/
-│   │   ├── alunoModel.js
-│   │   ├── cursoModel.js
-│   │   ├── departamentoModel.js
-│   │   ├── emailModel.js
-│   │   ├── matriculaModel.js
-│   │   ├── pagamentoModel.js
-│   │   └── turmaModel.js
-│   │
 │   ├── routes/
-│   │   ├── alunos.js
-│   │   ├── cursos.js
-│   │   ├── departamentos.js
-│   │   ├── emails.js
-│   │   ├── matriculas.js
-│   │   ├── pagamentos.js
-│   │   └── turmas.js
-│   │
 │   ├── scripts/
-│   │   ├── faker_alunos_matriculas.js
-│   │   └── faker_pagamentos.js
-│   │
 │   └── server.js
-│
 ├── .gitignore
 ├── package.json
-├── package-lock.json
 └── README.md
 ```
----
 
-## ⚙️ Installation & Setup
+## ⚙️ Environment Setup
 
-1. **Clone this repository**
-   ```bash
+1. Configure your Microsoft SQL Server connection in `src/config/db.js`
+2. Run the SQL scripts in `src/database/` to create the database structure
+3. Generate mock data using the Faker.js scripts in `src/scripts/`
+
+## 💡 How to Use
+
+1. Clone the repository:
+```bash
    git clone https://github.com/dm-moro/WebSystemAcademic.git
+```
+
+2. Navigate to the project directory:
+```bash
    cd WebSystemAcademic
-   ```
+```
 
-2. **Install dependencies**
-   ```bash
+3. Install dependencies:
+```bash
    npm install
-   ```
+```
 
-3. **Set up the database**
-   - Configure your **Microsoft SQL Server** connection in `src/config/db.js`
-   - Create the required tables or run your migration script
-   - Generate mock data for the tables using the scripts in `src/scripts/` (powered by **Faker.js**)
+4. Configure the database as described above.
 
-4. **Run the server**
-   ```bash
+5. Start the server:
+```bash
    npm start
-   ```
-   The server will start on `http://localhost:3000`
+```
 
-5. **Open the frontend**
-   - Navigate to the `public` folder
-   - Open `index.html` in your browser
+6. Open `public/index.html` in your browser or navigate to `http://localhost:3000`.
 
----
+## 📌 Credits
 
-## ☁️ Deployment
-This project does not use cloud services.  
-The database is managed locally on Linux using **Azure Data Studio**.
-
----
-
-## ℹ️ Note
-This project was developed for **UNICEP São Carlos University** under the guidance of teacher **Saulo Santos**.
+> This project was developed for **UNICEP São Carlos University** under the guidance of teacher **Saulo Santos**.
